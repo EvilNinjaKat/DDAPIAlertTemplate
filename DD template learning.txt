@@ -1,0 +1,24 @@
+#High Latency Alert
+
+avg:<your-latency-metric>{<service-tag>} by {transaction,env} > <your-threshold>
+
+# <your-latency-metric> name of the latency metric to monitor <your-threshold> threshold value in milliseconds.
+# <service-tag> tag identifies the service or API endpoint 
+
+#High and Low Threshold Throughput Alert
+
+avg:<your-throughput-metric>{<service-tag>} by {transaction,env} > <your-high-threshold> OR avg:<your-throughput-metric>{<service-tag>} by {transaction,env} < <your-low-threshold>
+# <your-throughput-metric> = name of the throughput metric  <your-high-threshold> = high threshold value <your-low-threshold> = low threshold value.
+
+# <service-tag> identifies the service or API endpoint 
+
+#No Signal Alert
+
+last(<your-metric>{*})=null
+# <your-metric> with the name of the metric also "notify_no_data": False,
+
+#Increased Error Rates Alert
+
+sum:<your-error-metric>{<service-tag>} by {transaction,env}.as_count() / sum:<your-request-metric>{<service-tag>} by {transaction,env}.as_count() > <your-threshold>
+# <your-error-metric> = error metric  <your-request-metric> = name of the total request metric, <service-tag> tag that identifies the service or API endpoint 
+# <your-threshold>  threshold value as a percentage
