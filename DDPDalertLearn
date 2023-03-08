@@ -1,0 +1,57 @@
+import requests
+import json
+
+# Datadog API parameters
+api_key = '<your-datadog-api-key>'
+app_key = '<your-datadog-application-key>'
+monitor_name = 'Latency metric alert'
+query = '<your-latency-metric-query>'
+threshold = 1000 # set your threshold value in milliseconds
+
+# PagerDuty integration parameters
+pd_integration_key = '<your-pagerduty-integration-key>'
+pd_service_key = '<your-pagerduty-service-key>'
+
+# Create Datadog monitor
+url = 'https://api.datadoghq.com/api/v1/monitor'
+headers = {'Content-Type': 'application/json', 'DD-API-KEY': api_key, 'DD-APPLICATION-KEY': app_key}
+data = {
+    "name": monitor_name,
+    "type": "metric alert",
+    "query": query,
+    "message": "Latency metric is above threshold of " + str(threshold) + "ms",
+    "options": {
+        "notify_audit": True,
+        "timeout_h": 2,
+        "require_full_window": True,
+        "notify_no_data": True,
+        "escalation_message": "",
+        "new_host_delay": 300,
+        "include_tags": True,
+        "locked": False,
+        "thresholds": {
+            "critical": threshold
+        },
+        "escalation_policy": []
+    }
+}
+response = requests.post(url, headers=headers, data=json.dumps(data))
+monitor_id = response.json()['id']
+
+# Set up PagerDuty integration
+url = 'https://api.datadoghq.com/api/v1/integration/pagerduty'
+data = {
+    "service_key": pd_service_key,
+    "integration_key": pd_integration_key,
+    "name": "PagerDuty Integration",
+    "description": "PagerDuty Integration for Latency Metric Alert",
+    "default_alert_subject": "Latency Metric Alert",
+    "default_alert_message": "Latency metric is above threshold of " + str(threshold) + "ms",
+    "alert_thresholds": {
+        "critical": threshold
+    },
+    "notify_on_resolution": True,
+    "monitor_ids": [monitor_id],
+    "tags": []
+}
+response = requests.post(url, headers=headers, data=json.dumps(data))
